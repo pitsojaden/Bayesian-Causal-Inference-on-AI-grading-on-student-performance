@@ -1,0 +1,94 @@
+% Main manuscript file
+% Bayesian Causal Inference on AI Grading Effects on Student Performance
+% Compiled: December 9, 2025
+
+\documentclass[12pt]{article}
+
+% Packages
+\usepackage[margin=1in]{geometry}
+\usepackage{natbib}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows, positioning}
+
+% Configure hyperref
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue,
+    pdfauthor={Author Name},
+    pdftitle={Bayesian Causal Inference on AI Grading Effects on Student Performance}
+}
+
+% APA-style citation configuration
+\bibliographystyle{apalike}
+\bibpunct{(}{)}{;}{a}{,}{,}
+
+% Title information
+\title{Bayesian Causal Inference on AI Grading Effects on Student Performance: A Hierarchical Mediation Analysis}
+
+\author{
+    Author Name\thanks{Department of Statistics, University Name. Email: author@university.edu} \\
+    \textit{University Name}
+}
+
+\date{\today}
+
+% Document begins
+\begin{document}
+
+% Title page
+\maketitle
+
+% Abstract
+\begin{abstract}
+\noindent The rapid adoption of artificial intelligence in educational assessment systems raises critical questions about how automated grading affects student learning outcomes. While existing research documents AI grading performance and student engagement patterns separately, no study has rigorously examined the causal mechanisms linking AI grading intensity to student performance through engagement pathways. We address this gap using hierarchical Bayesian causal inference applied to large-scale online learning data. Employing directed acyclic graphs and three complementary models---total effect, direct effect, and formal mediation---we decompose AI grading impacts into direct pathways and indirect effects operating through student engagement trajectories. Our analysis accounts for institutional confounding through module-level random effects and employs modern Bayesian workflows including prior predictive checks, posterior validation, and information-theoretic model comparison (LOO-CV, WAIC). Results provide the first rigorous decomposition of AI grading effects, revealing whether interventions should target grading algorithms or engagement support systems. This study advances methodological practice in educational causal inference while informing evidence-based policy for AI-mediated assessment deployment.
+
+\vspace{0.3cm}
+
+\noindent \textbf{Keywords:} Bayesian causal inference, hierarchical modeling, mediation analysis, AI grading, student engagement, learning analytics, educational technology, PyMC, MCMC
+
+\end{abstract}
+
+\onehalfspacing
+
+% Table of contents (optional - comment out if not needed)
+% \newpage
+% \tableofcontents
+% \newpage
+
+% Introduction section
+\input{manuscript_introduction.tex}
+\input{manuscript_literature_review.tex}
+\input{manuscript_conceptual_framework.tex}
+
+% Methods section
+\input{manuscript_methods.tex}
+
+% Results section
+\input{manuscript_results.tex}
+
+% Discussion section
+\input{manuscript_discussion.tex}
+
+% Conclusion section
+\input{manuscript_conclusion.tex}
+
+% Acknowledgments
+\section*{Acknowledgments}
+The authors acknowledge the Open University for making the Open University Learning Analytics Dataset (OULAD) publicly available under a Creative Commons Attribution 4.0 International license. We thank the Knowledge Media Institute at the Open University for their work in curating and maintaining this valuable research resource.
+
+% References
+\singlespacing
+\bibliography{references}
+
+% Appendices (if needed)
+% \appendix
+% \section{Additional Tables and Figures}
+% \section{Supplementary Analyses}
+
+\end{document}

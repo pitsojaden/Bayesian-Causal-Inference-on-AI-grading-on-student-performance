@@ -1,0 +1,114 @@
+% Methods Section for: Bayesian Causal Inference on AI Grading Effects on Student Performance
+
+\section{Methods}
+
+\subsection{Data Source and Sample}
+
+This study utilized data from the Open University Learning Analytics Dataset (OULAD), a publicly available dataset released by the Open University in the United Kingdom under a Creative Commons Attribution 4.0 International (CC BY 4.0) license \citep{kuzilek2017open}. The dataset was designed to support research on learning analytics and student success prediction. It comprises anonymized student demographic information, assessment outcomes, and detailed clickstream logs capturing student interactions with the virtual learning environment across multiple modules and academic presentations.
+
+The analysis combined two data files. The first contained student-level records including final assessment scores, total platform clicks, early engagement indicators, and engagement trajectory measures. The second contained assessment-level trajectory data used to compute module-level AI grading intensity. After merging these files and removing cases with missing values on key variables, the final analytic sample comprised 25,471 students nested within 22 unique module presentations. Each module presentation represents a distinct combination of course subject and academic term.
+
+\subsection{Variables}
+
+Table \ref{tab:variables} summarizes all variables used in the analysis. The outcome variable was the student assessment score, measured on a 0 to 100 point scale. The treatment variable was AI grading intensity, a continuous measure computed at the module level. We operationalized AI grading intensity using three observable signals from assessment score distributions within each module. The first signal captured low score variance, reflecting the tendency of automated systems to produce uniform scores. The second captured the count of unique score values, as automated systems often assign discrete or rounded scores. The third captured mode frequency, quantifying the dominance of the most common score. We normalized each signal to the 0 to 1 range and averaged them to create a composite AI intensity measure.
+
+\begin{table}[h!]
+\centering
+\caption{Summary of Study Variables}
+\label{tab:variables}
+\small
+\begin{tabular}{lcll}
+\hline
+Variable & Role & Operationalization & Scale \\
+\hline
+Score & Outcome & Final assessment score & 0--100 \\
+AI Intensity & Treatment & Composite index & 0--1 \\
+Early Clicks & Mediator & Log of early platform clicks & Continuous \\
+Click Decline & Control & Weekly engagement decline & Continuous \\
+Module & Confounder & Course-presentation ID & 22 levels \\
+\hline
+\end{tabular}
+\end{table}
+
+Two mediating variables captured student engagement. Early engagement was operationalized as the natural logarithm of platform clicks during the first weeks of the course. Engagement trajectory was measured as the rate of decline in weekly clicks throughout the term. Larger values indicated steeper declines in engagement over time. Module context served as a confounder in our causal framework. We addressed this through hierarchical random effects at the module presentation level, allowing each module to have its own baseline intercept while sharing information across the population of modules.
+
+
+\subsection{Analytic Strategy}
+
+The analysis proceeded in three stages. First, we specified a causal directed acyclic graph (DAG) encoding our theoretical assumptions about the relationships among variables. Second, we estimated three Bayesian hierarchical models corresponding to different causal quantities. Third, we conducted extensive diagnostics and sensitivity analyses to evaluate the robustness of our findings.
+
+\subsection{Causal Identification}
+
+Causal identification relies on the backdoor criterion \citep{jivet2021causal}. The DAG posits that AI grading intensity affects student scores through two pathways. The direct pathway captures effects unrelated to engagement, such as systematic differences in algorithmic leniency. The indirect pathway operates through student engagement, where AI grading first influences engagement behaviors and engagement subsequently affects performance.
+
+Module context confounds all relationships in the DAG. Easy modules may both employ more AI grading and produce higher scores. Similarly, modules with particular pedagogical designs may simultaneously encourage high engagement and high automation. We block these backdoor paths by conditioning on module context through hierarchical random effects. This strategy assumes that within a given module presentation, variation in AI grading intensity is conditionally independent of potential outcomes.
+
+\subsection{Statistical Models}
+
+% Reduce spacing around equations
+\setlength{\abovedisplayskip}{3pt}
+\setlength{\belowdisplayskip}{3pt}
+\setlength{\abovedisplayshortskip}{1pt}
+\setlength{\belowdisplayshortskip}{1pt}
+
+We estimated three Bayesian hierarchical models. All models used standardized variables to improve sampling efficiency. Posterior estimates were subsequently transformed to the original scale for interpretation.
+
+\subsubsection{Total Effect Model}
+
+The Total Effect Model estimates the overall causal effect of AI grading intensity on student scores without conditioning on mediators. The model is specified as follows. Let $y_i$ denote the standardized score for student $i$ and let $T_i$ denote the standardized AI grading intensity for the module in which student $i$ is enrolled. Let $j[i]$ denote the module assignment function mapping student $i$ to module $j$. The likelihood is
+\begin{equation}
+y_i \sim \text{Normal}(\mu_i, \sigma^2)
+\end{equation}
+where the linear predictor is
+\begin{equation}
+\mu_i = \alpha + \beta_{\text{AI}} T_i + u_{j[i]}
+\end{equation}
+and the module-level random effects are drawn from a common distribution
+\begin{equation}
+u_j \sim \text{Normal}(0, \sigma_u^2)
+\end{equation}
+The priors are $\alpha \sim \text{Normal}(0, 1)$, $\beta_{\text{AI}} \sim \text{Normal}(0, 1)$, $\sigma \sim \text{Half-Normal}(0, 1)$, and $\sigma_u \sim \text{Half-Normal}(0, 0.5)$. These weakly informative priors center mass on plausible effect sizes while allowing the data to dominate inference.
+
+\subsubsection{Direct Effect Model}
+
+The Direct Effect Model estimates the effect of AI grading while controlling for engagement mediators. Let $E_i$ denote standardized early engagement and let $D_i$ denote standardized engagement decline. The likelihood remains Gaussian with linear predictor
+\begin{equation}
+\mu_i = \alpha + \beta_{\text{AI}} T_i + \beta_E E_i + \beta_D D_i + u_{j[i]}
+\end{equation}
+The same prior structure applies to all coefficients. The parameter $\beta_{\text{AI}}$ in this model represents the direct effect of AI grading on scores, holding engagement constant.
+
+\subsubsection{Mediation Model}
+
+The Mediation Model decomposes the total effect into direct and indirect components using the product-of-coefficients approach. The model specifies two equations. The mediator equation relates AI grading intensity to early engagement
+\begin{equation}
+E_i \sim \text{Normal}(\alpha_a + \beta_a T_i, \sigma_a^2)
+\end{equation}
+The outcome equation relates both engagement and AI grading to scores
+\begin{equation}
+y_i \sim \text{Normal}(\alpha_b + \beta_b E_i + \beta_{c'} T_i + u_{j[i]}, \sigma_b^2)
+\end{equation}
+The indirect effect is computed as $\beta_a \times \beta_b$. The direct effect is $\beta_{c'}$. The total effect is the sum of indirect and direct effects. The proportion mediated is the ratio of indirect to total effect. These quantities are computed as derived parameters within the Bayesian model, providing full posterior distributions and credible intervals.
+
+\subsection{Prior Specification}
+
+We specified weakly informative priors to regularize estimates without incorporating strong substantive information. Regression coefficients received Normal(0, 1) priors on the standardized scale. This places approximately 95 percent of the prior mass within two standard deviation units. Variance components received Half-Normal priors with scale parameter 0.5 or 1.0, concentrating mass near zero while permitting larger values if supported by the data.
+
+To validate prior choices, we conducted prior predictive checks before observing outcome data. We sampled from the prior distribution of model parameters and propagated uncertainty forward to generate predicted score distributions. We examined whether the prior-implied predictions covered the plausible range of outcomes.
+
+\subsection{Estimation}
+
+All models were estimated using Markov Chain Monte Carlo (MCMC) sampling implemented in PyMC version 5 \citep{abril2023pymc}. We ran four parallel chains of 4,000 iterations each following 2,000 warmup iterations, yielding 16,000 posterior samples per parameter. Sampling used the No-U-Turn Sampler (NUTS), an adaptive variant of Hamiltonian Monte Carlo that automatically tunes trajectory length. A random seed of 42 ensured reproducibility.
+
+Convergence was assessed using multiple diagnostics. The potential scale reduction factor, denoted $\hat{R}$, compares between-chain and within-chain variance and should be below 1.01 for all parameters. Effective sample size (ESS) quantifies the number of approximately independent samples accounting for autocorrelation and should exceed 400 per chain. Divergent transitions indicate regions where the sampler encountered numerical difficulties and should be absent.
+
+\subsection{Model Comparison}
+
+We compared models using Leave-One-Out Cross-Validation (LOO-CV) computed via Pareto-smoothed importance sampling \citep{jung2024comparison}. LOO-CV estimates expected log predictive density (ELPD) for new observations. Higher ELPD indicates better predictive performance. We also computed the Widely Applicable Information Criterion (WAIC) as a complementary measure. Both metrics balance model fit against complexity without requiring held-out data.
+
+\subsection{Sensitivity Analyses}
+
+We conducted three types of sensitivity analyses to evaluate robustness. First, we examined sensitivity to unmeasured confounding by simulating the effect of a hypothetical confounder with specified correlations to both treatment and outcome \citep{park2025simulation}. Second, we tested sensitivity to prior specification by re-estimating the Total Effect Model under four alternative priors: diffuse priors with larger variance, skeptical priors centered at zero with small variance, and informative priors encoding a positive effect. Third, we conducted subset analyses stratifying by student engagement level. We re-estimated the Total Effect Model separately for high-engagement students above the median and low-engagement students below the median to assess whether effects differed across these subpopulations.
+
+\subsection{Software and Reproducibility}
+
+Analysis was conducted in Python 3.11 using PyMC \citep{abril2023pymc} for Bayesian modeling and ArviZ \citep{kumar2019arviz} for diagnostics and visualization. All code, data preprocessing steps, and random seeds are documented to ensure full reproducibility of results.

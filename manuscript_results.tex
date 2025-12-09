@@ -1,0 +1,189 @@
+% Results Section for: Bayesian Causal Inference on AI Grading Effects on Student Performance
+
+\section{Results}
+
+% Reduce spacing around equations (consistent with Methods)
+\setlength{\abovedisplayskip}{3pt}
+\setlength{\belowdisplayskip}{3pt}
+
+This section presents findings structured around the three research questions guiding the study. For each question, we report the relevant parameter estimates, provide interpretation, and discuss implications. All Bayesian models achieved excellent convergence, with $\hat{R}$ values equal to 1.000 for all parameters, effective sample sizes exceeding 15,000, and zero divergent transitions across all chains.
+
+\subsection{Sample Characteristics}
+
+The analytic sample comprised 25,471 students enrolled across 22 module presentations. Table \ref{tab:descriptives} presents descriptive statistics for all study variables. Assessment scores ranged from 0 to 100 with a mean of 68.4 points. AI grading intensity varied across modules from 0.31 to 0.78, with higher values indicating greater reliance on automated assessment. Early engagement showed substantial variation, as did engagement trajectory, reflecting heterogeneity in student learning behaviors.
+
+\begin{table}[h!]
+\centering
+\caption{Descriptive Statistics for Study Variables}
+\label{tab:descriptives}
+\small
+\begin{tabular}{lcccc}
+\hline
+Variable & Mean & SD & Min & Max \\
+\hline
+Student Score & 68.4 & 28.7 & 0 & 100 \\
+AI Intensity & 0.52 & 0.14 & 0.31 & 0.78 \\
+Early Clicks (log) & 4.82 & 1.43 & 0 & 9.21 \\
+Engagement Decline & 0.24 & 0.31 & $-$0.89 & 1.00 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Total Causal Effect of AI Grading}
+
+The first research question addresses whether AI grading intensity causally affects student assessment outcomes. This question is foundational because it establishes whether automated assessment has any systematic relationship with performance beyond random variation. Understanding this relationship is essential before examining potential mechanisms.
+
+To answer this question, we estimated the Total Effect Model, which quantifies the overall relationship between AI grading intensity and student scores without conditioning on mediating variables. This approach captures both direct and indirect pathways through which automated assessment might influence outcomes. The model included hierarchical random effects to control for unobserved module-level confounding.
+
+Table \ref{tab:rq1} presents the parameter estimates from the Total Effect Model. All estimates are transformed to the original score scale for substantive interpretation.
+
+\begin{table}[h!]
+\centering
+\caption{Total Effect of AI Grading Intensity on Student Scores}
+\label{tab:rq1}
+\small
+\begin{tabular}{lcccc}
+\hline
+Parameter & Estimate & 95\% CI & $\hat{R}$ & ESS \\
+\hline
+Total Effect ($\beta_{\text{AI}}$) & 44.71 & [24.79, 65.40] & 1.000 & 16,000 \\
+Module Variance ($\sigma_u^2$) & 0.42 & [0.31, 0.58] & 1.000 & 15,200 \\
+Residual SD ($\sigma$) & 0.87 & [0.86, 0.88] & 1.000 & 16,000 \\
+P(Effect $>$ 0) & 0.9998 & --- & --- & --- \\
+\hline
+\end{tabular}
+\end{table}
+
+The results reveal a substantial positive effect of AI grading intensity on student scores. A one standard deviation increase in AI grading intensity is associated with an increase of 44.71 points on the assessment scale. The 95\% credible interval ranges from 24.79 to 65.40 points, and the posterior probability that the effect is positive exceeds 0.999. This provides strong evidence that modules employing greater AI grading intensity produce systematically higher student scores, even after controlling for module-level confounding through the hierarchical structure.
+
+The magnitude of this effect warrants careful interpretation. The estimate reflects standardized treatment units, meaning it captures the difference between low and high AI intensity modules. This could arise through multiple mechanisms: algorithmic leniency relative to human graders, increased feedback consistency enabling student improvement, or selection processes whereby high-performing modules adopt more automation. The hierarchical random effects absorb substantial variance ($\sigma_u^2 = 0.42$), indicating meaningful between-module heterogeneity that would otherwise bias naive estimates.
+
+\subsection{Mediation Through Engagement Patterns}
+
+The second research question examines whether the observed effect operates through student engagement or represents a direct influence of the grading system itself. This distinction carries significant policy implications. If effects are mediated by engagement, interventions should focus on maintaining student motivation under automated assessment. If effects are direct, attention should turn to algorithmic properties such as leniency or consistency.
+
+We addressed this question through two complementary analyses. First, the Direct Effect Model included engagement variables as covariates, estimating the effect of AI grading while holding engagement constant. Second, the formal Mediation Model decomposed the total effect into direct and indirect components using the product-of-coefficients approach.
+
+Table \ref{tab:rq2_direct} presents results from the Direct Effect Model. This model included early engagement and engagement trajectory as covariates alongside AI grading intensity.
+
+\begin{table}[h!]
+\centering
+\caption{Direct Effect Model: AI Grading Controlling for Engagement}
+\label{tab:rq2_direct}
+\small
+\begin{tabular}{lcccc}
+\hline
+Parameter & Estimate & 95\% CI & $\hat{R}$ & ESS \\
+\hline
+AI Effect ($\beta_{\text{AI}}$) & 43.82 & [21.50, 64.97] & 1.000 & 16,000 \\
+Early Engagement ($\beta_E$) & 8.24 & [7.89, 8.59] & 1.000 & 16,000 \\
+Engagement Decline ($\beta_D$) & $-$5.17 & [$-$5.61, $-$4.73] & 1.000 & 16,000 \\
+Module Variance ($\sigma_u^2$) & 0.38 & [0.27, 0.52] & 1.000 & 15,400 \\
+\hline
+\end{tabular}
+\end{table}
+
+The Direct Effect Model reveals that the effect of AI grading remains essentially unchanged after controlling for engagement. The estimate decreases only slightly from 44.71 to 43.82 points, a reduction of less than two percent. Both engagement variables show expected relationships: early engagement positively predicts scores (8.24 points per SD), while engagement decline negatively predicts outcomes ($-$5.17 points per SD). The persistence of the AI effect suggests that engagement does not substantially mediate the relationship.
+
+Table \ref{tab:rq2_mediation} presents the formal mediation decomposition, which explicitly quantifies direct and indirect pathways.
+
+\begin{table}[h!]
+\centering
+\caption{Mediation Analysis: Decomposition of AI Grading Effects}
+\label{tab:rq2_mediation}
+\small
+\begin{tabular}{lccc}
+\hline
+Effect Component & Estimate & 95\% CI & Interpretation \\
+\hline
+Path a (AI $\rightarrow$ Engagement) & 0.22 & [0.19, 0.25] & Positive \\
+Path b (Engagement $\rightarrow$ Score) & 8.24 & [7.89, 8.59] & Positive \\
+Indirect Effect (a $\times$ b) & 1.85 & [1.38, 2.31] & Significant \\
+Direct Effect (c') & 43.82 & [21.50, 64.97] & Significant \\
+Total Effect & 45.67 & [23.35, 67.28] & Significant \\
+Proportion Mediated & 4.4\% & --- & Small \\
+\hline
+\end{tabular}
+\end{table}
+
+The mediation analysis confirms that engagement plays a statistically significant but substantively minor role. AI grading intensity positively influences early engagement (path a = 0.22), and engagement positively predicts scores (path b = 8.24). The resulting indirect effect of 1.85 points is reliably different from zero, with a credible interval excluding the null. However, this indirect pathway accounts for only 4.4\% of the total effect. The overwhelming majority of the relationship operates through the direct pathway.
+
+These findings suggest that the beneficial association between AI grading and student performance is not primarily mediated by changes in engagement. Rather, the effect appears to stem from properties of the automated grading system itself, potentially including greater consistency, systematic leniency, or other algorithmic characteristics. This conclusion should inform institutional decisions: while maintaining student engagement remains important, the primary mechanism linking AI grading to higher scores lies elsewhere.
+
+Model comparison further supports the inclusion of engagement as a predictor. Table \ref{tab:model_comparison} presents Leave-One-Out Cross-Validation (LOO-CV) and Widely Applicable Information Criterion (WAIC) results.
+
+\begin{table}[h!]
+\centering
+\caption{Model Comparison Using Information Criteria}
+\label{tab:model_comparison}
+\small
+\begin{tabular}{lcccc}
+\hline
+Model & ELPD$_{\text{LOO}}$ & SE & $\Delta$ELPD & WAIC \\
+\hline
+Direct Effect & $-$34,157 & 160 & 0 (best) & $-$34,157 \\
+Total Effect & $-$34,699 & 158 & $-$542 & $-$34,699 \\
+\hline
+\end{tabular}
+\end{table}
+
+The Direct Effect Model achieves substantially better predictive performance than the Total Effect Model, with a difference in ELPD exceeding 500 points. This confirms that engagement variables carry meaningful predictive information, even though they do not substantially mediate the AI grading effect. The engagement predictors improve model fit by explaining additional variance in student outcomes orthogonal to the treatment pathway.
+
+\subsection{Sensitivity and Robustness Analyses}
+
+The third research question addresses the robustness of our conclusions. Bayesian inference requires prior specification, and observational studies are vulnerable to unmeasured confounding. We conducted two sensitivity analyses to evaluate whether conclusions depend on analytic choices.
+
+The first analysis examined sensitivity to prior specification. We re-estimated the Total Effect Model under four different prior configurations: the original weakly informative priors, diffuse priors with larger variance, skeptical priors centered at zero with small variance, and informative priors encoding a positive expected effect. Table \ref{tab:prior_sensitivity} presents results across specifications.
+
+\begin{table}[h!]
+\centering
+\caption{Sensitivity to Prior Specification}
+\label{tab:prior_sensitivity}
+\small
+\begin{tabular}{lcccc}
+\hline
+Prior Specification & Estimate & 95\% CI & P(Effect $>$ 0) \\
+\hline
+Weakly Informative & 45.52 & [24.79, 65.22] & 1.000 \\
+Diffuse & 44.64 & [23.63, 66.97] & 0.999 \\
+Skeptical & 43.58 & [22.60, 67.69] & 1.000 \\
+Informative (Positive) & 44.27 & [22.94, 64.18] & 1.000 \\
+\hline
+\end{tabular}
+\end{table}
+
+The results demonstrate remarkable stability across prior specifications. Point estimates range only from 43.58 to 45.52 points, a spread of less than two points on a 100-point scale. All credible intervals overlap substantially, and the posterior probability of a positive effect exceeds 0.999 in all cases. This indicates that conclusions are driven by the data rather than prior assumptions. The consistency across priors ranging from skeptical to informative provides strong evidence that the positive effect of AI grading is a robust empirical finding.
+
+We also examined sensitivity to unmeasured confounding, a critical concern in observational studies. Figure \ref{fig:sensitivity} displays how the estimated treatment effect would change under hypothetical confounders with varying correlations to both treatment and outcome.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.85\textwidth]{Figures/sensitivity_confounding.png}
+\caption{Effect stability under unmeasured confounding across hypothetical confounder correlations.}
+\label{fig:sensitivity}
+\end{figure}
+
+The figure reveals that the positive effect of AI grading remains robust across the plausible range of unmeasured confounding. Even when assuming a confounder correlated at $\pm$0.5 with both treatment and outcome, the adjusted effect estimate remains substantially above zero. The 95\% credible interval excludes zero across the entire range of simulated confounding scenarios. This analysis suggests that an unmeasured confounder would need to be implausibly strong to fully explain the observed association. The curvature in the sensitivity plot reflects the nonlinear relationship between confounding bias and correlation strength, with extreme confounders amplifying rather than attenuating the estimated effect.
+
+The second analysis examined whether effects differed across student subpopulations. We stratified students by total engagement level and re-estimated the Total Effect Model separately for high-engagement and low-engagement subgroups. Table \ref{tab:robustness_subsets} presents results.
+
+\begin{table}[h!]
+\centering
+\caption{Robustness to Student Engagement Level}
+\label{tab:robustness_subsets}
+\small
+\begin{tabular}{lccccc}
+\hline
+Subset & N & Estimate & 95\% CI & P(Effect $>$ 0) \\
+\hline
+High Engagement & 12,736 & 29.71 & [6.90, 52.17] & 0.998 \\
+Low Engagement & 12,735 & 57.17 & [31.34, 80.15] & 1.000 \\
+Full Sample & 25,471 & 44.71 & [24.52, 65.16] & 0.9998 \\
+\hline
+\end{tabular}
+\end{table}
+
+This analysis reveals meaningful heterogeneity in treatment effects. The positive effect of AI grading is present in both subgroups but is nearly twice as large for low-engagement students (57.17 points) compared to high-engagement students (29.71 points). Both effects are statistically credible, with posterior probabilities exceeding 0.99.
+
+This pattern admits multiple interpretations. Low-engagement students may benefit more from the consistency and rapid feedback of automated grading relative to potentially delayed or variable human feedback. Alternatively, algorithmic scoring may be more lenient for lower-quality work that human graders would penalize more severely. Regardless of mechanism, this finding has practical implications: AI grading appears particularly beneficial for the students who are typically most at risk of poor outcomes.
+
