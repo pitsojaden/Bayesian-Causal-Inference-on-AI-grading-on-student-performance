@@ -1,0 +1,19 @@
+% Introduction for: Bayesian Causal Inference on AI Grading Effects on Student Performance
+% Compiled: December 9, 2025
+% Distilled Version (Approx 380 words)
+
+\section{Introduction}
+
+The integration of artificial intelligence into educational assessment has transformed feedback mechanisms, yet critical questions remain about its impact on student behavior \citep{sadasivan2025automated, huang2025ai}. As learning management systems increasingly automate grading, it is unclear whether these systems merely replicate human evaluation or systematically alter outcomes by reshaping student engagement \citep{gierl2025implementation}. This study employs Bayesian causal inference to quantify how AI grading intensity influences performance through engagement-mediated pathways.
+
+Educational data science is evolving from predictive modeling to causal frameworks \citep{jivet2021causal}. While early analytics successfully predicted at-risk students \citep{sha2022predicting}, they failed to explain the mechanisms driving these outcomes. Recent hierarchical Bayesian approaches address this limitation by accommodating nested data structures and quantifying uncertainty, enabling the estimation of causal effects rather than mere associations \citep{mosia2025bayesian, sun2025hierarchical}.
+
+A tension exists between the technical accuracy of AI grading and its pedagogical impact. State-of-the-art models may match human inter-rater reliability \citep{sadasivan2025automated}, but trust deficits and distinct grade distributions can alter student engagement strategies \citep{gierl2025implementation, huang2025ai}. Simultaneously, while engagement predictors are well-documented \citep{zhang2023learning}, the causal direction remains ambiguous: does automated assessment drive engagement changes that subsequently affect learning, or are they co-occurring phenomena? \citet{lopez2020using} argue that analytics must move beyond monitoring to understanding these instructional interactions.
+
+Methodological advances in causal mediation analysis, particularly utilizing hierarchical Bayesian methods, now allow for the rigorous decomposition of these effects \citep{chi2022practical, song2021bayesian}. By making identification assumptions explicit and quantifying uncertainty \citep{reback2024introduction}, researchers can identify valid mediation pathways in observational settings.
+
+Despite this, a critical gap persists: no study has rigorously decomposed the causal effect of AI grading into direct versus engagement-mediated pathways. Existing research isolates either technical performance or engagement correlations, missing the structural causal link. This distinction is policy-critical: if effects are mediated by engagement, interventions should focus on feedback and support; if direct, the focus belongs on algorithmic refinement.
+
+We address this gap using hierarchical Bayesian causal inference on large-scale online learning data. We estimate three models: (1) total effect of AI grading on scores; (2) direct effect controlling for engagement; and (3) a formal mediation decomposition. We explicitly model institutional confounding and conduct rigorous sensitivity analyses \citep{park2025simulation}.
+
+Three research questions guide this study: RQ1: What is the causal effect of AI grading intensity on assessment scores? RQ2: To what extent is this relationship mediated by engagement patterns? RQ3: How sensitive are these estimates to confounding and prior specifications? By answering these, we provide evidence-based guidance for AI assessment deployment.

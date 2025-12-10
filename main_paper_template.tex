@@ -1,0 +1,313 @@
+\documentclass[12pt,a4paper]{article}
+
+% ============================================================================
+% PACKAGES
+% ============================================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{natbib}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning,shapes,arrows}
+
+% ============================================================================
+% HYPERREF SETUP
+% ============================================================================
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    citecolor=blue,
+    pdftitle={Bayesian Causal Inference on AI Grading Effects},
+    pdfauthor={Your Name},
+}
+
+% ============================================================================
+% CUSTOM COMMANDS
+% ============================================================================
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\text{Var}}
+\newcommand{\Cov}{\text{Cov}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\ind}{\perp\!\!\!\perp}
+
+% Custom theorem environments
+\theoremstyle{definition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{definition}{Definition}
+
+% ============================================================================
+% DOCUMENT PROPERTIES
+% ============================================================================
+\title{\textbf{Causal Effects of AI Grading on Student Performance: A Bayesian Hierarchical Analysis}}
+
+\author{
+    Your Name\thanks{Department of Education/Statistics, University Name. Email: your.email@university.edu} \\
+    \textit{University Name} \\
+    \\
+    Co-author Name \\
+    \textit{Institution Name}
+}
+
+\date{\today}
+
+% ============================================================================
+% DOCUMENT BEGIN
+% ============================================================================
+\begin{document}
+
+\onehalfspacing
+
+\maketitle
+
+% ============================================================================
+% ABSTRACT
+% ============================================================================
+\begin{abstract}
+\noindent
+The increasing adoption of artificial intelligence (AI) in educational assessment raises critical questions about its causal effects on student learning outcomes. This study employs Bayesian hierarchical causal inference to estimate the impact of AI grading intensity on student assessment performance in a large-scale online learning environment. Using data from 25,533 student-module observations across 22 courses, we develop a novel Bayesian latent measurement model to infer AI grading intensity from observable assessment patterns, addressing treatment measurement error often neglected in educational technology research. 
+
+Our analysis reveals three principal findings. First, AI grading intensity has a substantial positive causal effect on assessment scores (posterior mean: 45.5 points on a 0--100 scale per unit AI intensity increase, 95\% credible interval: [23.6, 64.1]), with posterior probability 1.000 that the effect is positive. Second, this effect operates predominantly through direct mechanisms—such as grading consistency, feedback quality, and criterion transparency—rather than behavioral pathways: only 4.5\% is mediated through changes in student engagement. Third, the effect is robust to alternative prior specifications, stable under hypothetical unmeasured confounding, and consistent across student subsets, supporting a causal interpretation despite the observational design.
+
+Methodologically, we advance causal inference in education by integrating latent measurement for treatment variables, hierarchical Bayesian modeling for clustered data, comprehensive sensitivity analyses, and mediation decomposition within a unified framework. Substantively, our findings challenge common assumptions that educational technology primarily influences outcomes by altering student behavior, suggesting instead that AI grading improves performance through direct pedagogical mechanisms. These results have important implications for educational policy, AI system design, and learning analytics research.
+
+\vspace{0.3cm}
+\noindent\textbf{Keywords:} Bayesian inference, causal inference, educational technology, artificial intelligence, automated grading, learning analytics, hierarchical modeling, mediation analysis
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+% ============================================================================
+% INTRODUCTION
+% ============================================================================
+\section{Introduction}
+
+Artificial intelligence (AI) systems are rapidly transforming educational assessment, with automated grading now used in millions of student evaluations worldwide \citep{example_ref}. These systems promise efficiency gains, consistency in evaluation, and immediate feedback—benefits particularly valuable in large-scale online courses and standardized testing. However, fundamental questions remain about whether AI grading causally improves student learning outcomes or merely replicates existing achievement patterns more efficiently.
+
+Prior research on automated assessment has documented associations between AI grading and student performance \citep{example_ref1, example_ref2}, but causal inference remains challenging due to non-random assignment, treatment measurement error, and complex mediation pathways. Students are not randomly assigned to AI-graded versus human-graded courses; rather, AI adoption reflects institutional decisions, instructor preferences, and course characteristics that may independently affect outcomes. Moreover, the "treatment" of AI grading is rarely measured directly—datasets typically record only whether a module uses AI (binary indicator) rather than the intensity or quality of automation. Finally, theoretical mechanisms are unclear: does AI grading improve performance by changing student behavior (e.g., increased engagement due to timely feedback), or through direct pedagogical improvements (e.g., grading consistency, criterion transparency) independent of behavioral change?
+
+This study addresses these challenges through Bayesian hierarchical causal inference on observational data from a large online learning platform. We make four principal contributions:
+
+\begin{enumerate}
+    \item \textbf{Latent measurement of treatment}: We develop a Bayesian latent measurement model that infers AI grading intensity from three observable signals—low score variance, few unique scores, and high mode frequency—rather than treating treatment as known. This approach propagates measurement uncertainty through causal inference, avoiding attenuation bias.
+    
+    \item \textbf{Causal identification and estimation}: Using a directed acyclic graph (DAG) to formalize assumptions, we estimate total causal effects adjusting for confounding via hierarchical module-level effects. Bayesian estimation provides complete uncertainty quantification, avoiding reliance on asymptotic approximations.
+    
+    \item \textbf{Mediation decomposition}: We decompose total effects into direct effects (not mediated by engagement) and indirect effects (transmitted through behavioral pathways), revealing that AI grading operates primarily through non-behavioral mechanisms.
+    
+    \item \textbf{Comprehensive robustness checks}: We assess sensitivity to unmeasured confounding, prior specification, and effect heterogeneity, demonstrating that inferences are stable across alternative assumptions.
+\end{enumerate}
+
+Our findings have important implications for educational policy, technology design, and methodological practice. Substantively, we provide the first rigorous causal estimates of AI grading effects that disentangle direct and mediated pathways, revealing that behavioral mechanisms play a minimal role. Methodologically, we demonstrate a generalizable framework for causal inference under treatment measurement error, common in educational technology research but rarely addressed explicitly.
+
+The remainder of the paper proceeds as follows. Section 2 reviews related literature on automated assessment and causal inference in education. Section 3 describes our data, measurement model for AI intensity, and causal identification strategy. Section 4 presents Bayesian hierarchical models for total effects, direct effects, and mediation. Section 5 reports results, including posterior estimates, model diagnostics, and sensitivity analyses. Section 6 discusses implications, limitations, and future directions. Section 7 concludes.
+
+% ============================================================================
+% LITERATURE REVIEW (Brief placeholder)
+% ============================================================================
+\section{Related Literature}
+
+\subsection{Automated Assessment in Education}
+
+[Insert literature review on automated grading, focusing on: (1) prevalence and types of AI systems, (2) documented associations with student outcomes, (3) theoretical mechanisms (behavioral vs. direct), (4) limitations of existing evidence (correlational, binary treatment, no mediation analysis)]
+
+\subsection{Causal Inference in Educational Technology}
+
+[Insert literature review on causal methods in ed tech, focusing on: (1) challenges of observational data (selection bias, confounding), (2) common approaches (regression adjustment, propensity scores, instrumental variables), (3) treatment measurement error problem, (4) Bayesian vs. frequentist paradigms]
+
+\subsection{Mediation Analysis for Mechanisms}
+
+[Insert literature review on mediation, focusing on: (1) importance of mechanism research, (2) causal mediation frameworks (potential outcomes, structural equations), (3) assumptions (sequential ignorability), (4) applications in education]
+
+% ============================================================================
+% METHODS SECTION (INCLUDE YOUR DETAILED METHODS)
+% ============================================================================
+\input{methods_section.tex}
+
+% ============================================================================
+% RESULTS SECTION (INCLUDE YOUR DETAILED RESULTS)
+% ============================================================================
+\input{results_section.tex}
+
+% ============================================================================
+% DISCUSSION SECTION (INCLUDE YOUR DETAILED DISCUSSION)
+% ============================================================================
+\input{discussion_outline.tex}
+
+% ============================================================================
+% CONCLUSION
+% ============================================================================
+\section{Conclusion}
+
+This study demonstrates that AI grading intensity has substantial positive causal effects on student assessment performance, operating primarily through direct pedagogical mechanisms rather than behavioral mediation. By integrating Bayesian latent measurement for treatment variables, hierarchical modeling for clustered data, and comprehensive sensitivity analyses, we provide a rigorous template for causal inference in educational technology research.
+
+Our findings challenge common assumptions that technology effects operate mainly by changing student behavior, suggesting instead that automated grading improves outcomes through consistency, transparency, and feedback quality. These results support the educational value of AI systems while clarifying the mechanisms through which benefits accrue.
+
+Future research should replicate these findings across diverse contexts, investigate long-term outcomes, explore heterogeneous treatment effects, and measure specific direct mechanisms more explicitly. As AI becomes increasingly central to educational practice, rigorous causal evidence on its effects and mechanisms is essential for evidence-based policy and responsible innovation.
+
+% ============================================================================
+% ACKNOWLEDGMENTS
+% ============================================================================
+\section*{Acknowledgments}
+
+[Insert acknowledgments for funding, data providers, research assistants, and constructive feedback from colleagues and reviewers]
+
+% ============================================================================
+% REFERENCES
+% ============================================================================
+\bibliographystyle{apalike}
+\bibliography{references}  % You'll need to create a references.bib file
+
+% Note: Create a references.bib file with your citations. Example entry:
+% @article{example_ref,
+%   author = {Smith, John and Doe, Jane},
+%   title = {Automated Grading in Online Education},
+%   journal = {Journal of Educational Technology},
+%   year = {2023},
+%   volume = {15},
+%   pages = {123--145}
+% }
+
+% ============================================================================
+% FIGURES AND TABLES (INCLUDE YOUR FIGURES AND TABLES)
+% ============================================================================
+\newpage
+\input{figures_and_tables.tex}
+
+% ============================================================================
+% APPENDICES
+% ============================================================================
+\newpage
+\appendix
+
+\section{Appendix A: Mathematical Derivations}
+
+\subsection{Bayesian Latent Measurement Model Details}
+
+The full posterior distribution for the latent measurement model is:
+
+\begin{align}
+p(\boldsymbol{\theta} | \mathbf{Z}) &\propto p(\mathbf{Z} | \boldsymbol{\theta}) \cdot p(\boldsymbol{\theta}) \\
+&= \prod_{j=1}^{J} \prod_{k=1}^{3} \text{Bernoulli}(z_{jk} | p_{jk}) \times \prod_{k=1}^{3} \text{Beta}(\alpha_k | 5, 2) \\
+&\quad \times \prod_{k=1}^{3} \text{Beta}(\beta_k | 5, 2) \times \text{Beta}(\mu_{\text{AI}} | 2, 2) \\
+&\quad \times \text{Gamma}(\kappa | 2, 0.1) \times \prod_{m=1}^{M} \text{Beta}(p_{\text{AI}, m} | \mu_{\text{AI}} \kappa, (1 - \mu_{\text{AI}}) \kappa)
+\end{align}
+
+where $p_{jk} = p_{\text{AI}, j} \cdot \alpha_k + (1 - p_{\text{AI}, j}) \cdot (1 - \beta_k)$ is the probability of observing signal $k$ for assessment $j$.
+
+\subsection{Derivation of Indirect Effect}
+
+Under the mediation framework with linear models:
+
+\begin{align}
+M &= \alpha_a + \beta_a \cdot X + \epsilon_a \\
+Y &= \alpha_b + \beta_b \cdot M + \beta_{c'} \cdot X + \epsilon_b
+\end{align}
+
+The indirect effect is derived by substituting the first equation into the second:
+
+\begin{align}
+Y &= \alpha_b + \beta_b (\alpha_a + \beta_a X + \epsilon_a) + \beta_{c'} X + \epsilon_b \\
+&= (\alpha_b + \beta_b \alpha_a) + (\beta_b \beta_a + \beta_{c'}) X + (\beta_b \epsilon_a + \epsilon_b)
+\end{align}
+
+The total effect is $\beta_b \beta_a + \beta_{c'}$, decomposed into:
+\begin{itemize}
+    \item Indirect effect: $\beta_b \beta_a$ (effect of $X$ on $Y$ through $M$)
+    \item Direct effect: $\beta_{c'}$ (effect of $X$ on $Y$ not through $M$)
+\end{itemize}
+
+\section{Appendix B: MCMC Sampling Details}
+
+\subsection{No-U-Turn Sampler (NUTS)}
+
+We employed the No-U-Turn Sampler \citep{hoffman2014nuts}, an extension of Hamiltonian Monte Carlo (HMC) that automatically tunes the trajectory length. NUTS avoids the random-walk behavior of Metropolis-Hastings and Gibbs sampling by leveraging gradient information to efficiently explore high-dimensional parameter spaces.
+
+Key hyperparameters:
+\begin{itemize}
+    \item \textbf{Warmup iterations}: 2,000 per chain (for adaptation of step size and mass matrix)
+    \item \textbf{Post-warmup samples}: 4,000 per chain
+    \item \textbf{Number of chains}: 4 (for robust convergence diagnostics)
+    \item \textbf{Target acceptance rate}: 0.95 (ensures detailed balance while minimizing rejections)
+    \item \textbf{Maximum tree depth}: 10 (prevents excessively long trajectories)
+\end{itemize}
+
+\subsection{Convergence Diagnostics}
+
+We assessed convergence using:
+\begin{enumerate}
+    \item \textbf{$\hat{R}$ statistic}: Gelman-Rubin potential scale reduction factor, comparing within-chain and between-chain variance. Values $< 1.01$ indicate convergence.
+    \item \textbf{Effective sample size (ESS)}: Accounts for autocorrelation in MCMC chains. Bulk ESS $> 400$ and tail ESS $> 400$ ensure reliable inference.
+    \item \textbf{Divergences}: Diagnostic for gradient evaluation errors indicating problematic posterior geometry. Zero divergences observed.
+\end{enumerate}
+
+\section{Appendix C: Prior Predictive Simulations}
+
+[Include additional prior predictive checks, sensitivity to hyperparameters, alternative prior families]
+
+\section{Appendix D: Additional Sensitivity Analyses}
+
+\subsection{Alternative Confounder Adjustment Sets}
+
+[Test alternative adjustment strategies based on different DAG assumptions]
+
+\subsection{Subsample Analyses by Module Type}
+
+[Estimate effects separately for different course domains or module types]
+
+\subsection{Temporal Robustness}
+
+[If temporal variation available, test whether effects are stable over time]
+
+\section{Appendix E: Data Processing and Variable Construction}
+
+\subsection{Engagement Metrics Calculation}
+
+Early engagement defined as:
+\begin{equation}
+\text{Early Engagement}_i = \log\left(1 + \sum_{t=1}^{14} \text{Clicks}_{it}\right)
+\end{equation}
+
+Engagement trajectory computed as normalized decline:
+\begin{equation}
+\text{Decline}_i = \frac{\text{Clicks}_{\text{early},i} - \text{Clicks}_{\text{late},i}}{\max(\text{Clicks}_{\text{early},i}, \text{Clicks}_{\text{late},i}) + \epsilon}
+\end{equation}
+where $\epsilon = 10^{-6}$ prevents division by zero.
+
+\subsection{Missing Data Handling}
+
+[Describe any imputation strategies, missingness patterns, and sensitivity to missing data assumptions]
+
+\section{Appendix F: Reproducibility Information}
+
+All analyses conducted in Python 3.13 with the following package versions:
+\begin{itemize}
+    \item PyMC: 5.26.1
+    \item ArviZ: 0.22.0
+    \item NumPy: 2.3.5
+    \item Pandas: 2.3.3
+    \item Matplotlib: 3.10.7
+    \item Seaborn: 0.13.2
+\end{itemize}
+
+Code and data (subject to privacy constraints) available at: [GitHub repository URL]
+
+Random seed set to 42 for all stochastic operations.
+
+\end{document}
+

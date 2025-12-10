@@ -1,0 +1,126 @@
+\section{Discussion}
+
+\subsection{Principal Findings}
+
+This study employed Bayesian hierarchical causal inference to estimate the effect of AI grading intensity on student assessment performance in a large-scale online learning environment. Our analysis revealed four principal findings with important implications for educational technology and learning analytics.
+
+First, we found a substantial positive causal effect of AI grading intensity on assessment scores. Using a Bayesian latent measurement model to infer AI intensity from observable grading patterns, we estimated that a one-unit increase in AI intensity (representing a shift from no automation to full automation) corresponds to an average gain of 45.5 points (95\% CI: [23.6, 64.1]) on a 0--100 scale. This effect is robust to alternative prior specifications, stable under hypothetical unmeasured confounding scenarios, and consistent across student subsets, supporting a causal interpretation despite the observational design.
+
+Second, decomposition analysis demonstrated that the effect operates predominantly through direct mechanisms rather than behavioral mediation. After controlling for student engagement patterns, the direct effect (44.8 points) was nearly identical to the total effect, with only 4.5\% mediated through changes in early engagement. This finding challenges common assumptions that automated grading primarily influences outcomes by altering student behavior, suggesting instead that the mechanism operates through grading consistency, feedback quality, or other pedagogical features intrinsic to automated assessment.
+
+Third, module-level variation in AI intensity (ranging from 0.096 to 0.511 on a 0--1 scale) provided natural dose-response variation for causal inference. Modules exhibited substantial heterogeneity in baseline performance (ICC = 0.13), but AI intensity was uncorrelated with module-level effects, supporting the assumption of conditional exchangeability after adjusting for module fixed effects.
+
+Fourth, engagement patterns showed counterintuitive relationships with AI intensity. While engagement strongly predicted performance (as expected), AI intensity had minimal impact on engagement trajectories, resulting in negligible behavioral mediation. This suggests that students maintain stable engagement levels regardless of grading automation, potentially because AI grading provides timely feedback that sustains motivation without requiring dramatic behavioral adjustments.
+
+\subsection{Comparison to Prior Literature}
+
+Our findings align with and extend prior research on automated assessment in several ways. Previous studies have documented positive associations between automated grading and student outcomes \citep[e.g.,][]{example1, example2}, but these studies typically relied on binary treatment indicators (AI vs. human grading) and did not address mediation mechanisms. By modeling AI intensity as a continuous construct inferred from latent measurement, we quantify dose-response relationships and decompose total effects into direct and mediated components.
+
+The negligible mediation through engagement contrasts with theoretical models emphasizing behavioral pathways as primary mechanisms of technology effects on learning \citep[e.g.,][]{example3}. Our findings suggest that automated grading may operate differently from other educational technologies: whereas adaptive learning systems influence outcomes primarily by altering study behaviors, AI grading affects outcomes through direct pedagogical mechanisms (e.g., criterion transparency, consistent application of rubrics, elimination of grader bias) that improve performance independent of behavioral change.
+
+The magnitude of the estimated effect (approximately 11 points for typical between-module contrasts in the IQR range) is larger than effects reported for many educational interventions \citep[meta-analytic benchmarks in][]{example4}. However, this estimate reflects heterogeneous "treatment" packages—modules with high AI intensity may differ from low-intensity modules in multiple ways beyond grading automation per se (e.g., assessment design, course structure, student populations). Causal identification relies on the assumption that module fixed effects adequately control for these confounders, an assumption that, while plausible, cannot be definitively verified in observational data.
+
+\subsection{Methodological Contributions}
+
+\subsubsection{Bayesian Latent Measurement for Treatment Variables}
+
+A key methodological innovation is the use of Bayesian latent measurement to infer treatment intensity from observable indicators. Treatment measurement error is pervasive in observational studies but rarely addressed rigorously. By explicitly modeling AI intensity as a latent construct indicated by multiple imperfect signals (low variance, few unique scores, high mode frequency), we propagate measurement uncertainty through the causal analysis, avoiding the attenuation bias that arises when error-prone treatments are treated as known.
+
+The hierarchical measurement model borrows strength across modules, improving precision for modules with fewer assessments while respecting module-specific variation. Posterior estimates exhibit tight credible intervals (typical width $\pm$0.05--0.10), indicating that the three signals collectively provide strong information about the underlying construct. This approach is generalizable to other contexts where treatment variables are latent or measured with error (e.g., instructional quality, intervention fidelity, technology adoption).
+
+\subsubsection{Hierarchical Bayesian Causal Models}
+
+Our Bayesian hierarchical framework offers several advantages over frequentist alternatives for causal inference in educational data:
+
+\begin{enumerate}
+    \item \textbf{Uncertainty quantification}: Posterior distributions provide complete characterizations of estimation uncertainty, enabling probability statements about effect magnitudes (e.g., $P(\text{effect} > 0) = 1.000$) that are directly interpretable without relying on asymptotic approximations or $p$-value thresholds.
+    
+    \item \textbf{Multilevel modeling}: Random effects for modules naturally account for clustering, partial pooling stabilizes estimates for small modules, and shrinkage toward group means mitigates overfitting—all within a unified probabilistic framework.
+    
+    \item \textbf{Prior regularization}: Weakly informative priors constrain extreme parameter values without imposing strong substantive beliefs, improving finite-sample performance while preserving sensitivity to data. Prior sensitivity analysis confirmed that inferences were data-dominated.
+    
+    \item \textbf{Model comparison}: LOO-CV provides a rigorous Bayesian approach to model selection that properly accounts for parameter uncertainty, avoiding the limitations of AIC/BIC in hierarchical models.
+\end{enumerate}
+
+These features are particularly valuable in educational research, where sample sizes vary across levels of hierarchy, treatment effects may be heterogeneous, and strong causal identification assumptions are difficult to justify.
+
+\subsubsection{Sensitivity Analysis Framework}
+
+We implemented a comprehensive sensitivity analysis framework addressing three key threats: (1) unmeasured confounding, via parametric sensitivity analysis over hypothetical confounder correlations; (2) prior specification, via re-estimation under alternative priors; and (3) effect heterogeneity, via subset analyses stratified by baseline engagement. Findings were consistent across all sensitivity checks, supporting robustness.
+
+This multi-pronged approach goes beyond standard robustness checks by quantifying the degree of unmeasured confounding required to overturn conclusions—a critical transparency practice for causal inference from observational data \citep[recommended by][]{example5}. Future applications should routinely include such sensitivity analyses to clarify the evidentiary basis for causal claims.
+
+\subsection{Practical Implications}
+
+\subsubsection{For Educational Institutions}
+
+The substantial positive effect of AI grading on student performance suggests that increased automation may improve learning outcomes, contrary to concerns that automated assessment sacrifices pedagogical quality for efficiency. Institutions considering AI adoption should recognize that benefits may extend beyond cost reduction to include measurable improvements in student achievement, potentially through mechanisms such as:
+
+\begin{itemize}
+    \item \textbf{Grading consistency}: Elimination of human variability and bias ensures that all students are evaluated against uniform standards.
+    \item \textbf{Rapid feedback}: Automated systems provide immediate results, enabling students to identify misconceptions and adjust learning strategies in real time.
+    \item \textbf{Criterion transparency}: Algorithmic rubrics make evaluation criteria explicit, helping students understand expectations and self-assess progress.
+\end{itemize}
+
+However, the near-zero mediation through engagement implies that AI grading alone does not substantially alter student behavior. Institutions seeking to maximize effects may need to combine AI grading with complementary interventions (e.g., adaptive feedback, personalized recommendations, nudges) that explicitly target behavioral mechanisms.
+
+\subsubsection{For Learning Analytics Research}
+
+The negligible behavioral mediation challenges common assumptions in learning analytics that technology effects operate primarily by changing student actions. Our findings suggest that automated grading influences outcomes through \textit{environmental} changes (consistency, transparency) rather than \textit{behavioral} changes (engagement trajectories). This distinction has important implications for mechanism research and theory development.
+
+Future studies should investigate specific direct mechanisms more explicitly—for example, by measuring grading reliability, feedback quality, and criterion clarity as potential mediators. Mixed-methods approaches combining quantitative causal analysis with qualitative investigation of student and instructor experiences could elucidate the "black box" of direct effects.
+
+\subsubsection{For AI System Design}
+
+The finding that AI effects are robust across engagement levels suggests that automated grading benefits low- and high-engagement students equally. This supports the scalability and equity of AI systems: benefits do not disproportionately accrue to already-engaged students (which would exacerbate inequality), nor are they limited to struggling students who might benefit most from additional support.
+
+Designers should prioritize features that enhance the direct mechanisms identified as most impactful: ensuring consistent application of rubrics, providing clear explanations of evaluation criteria, and delivering timely, actionable feedback. Efforts to "gamify" grading or artificially boost engagement may be less effective than simply improving the core pedagogical quality of automated assessments.
+
+\subsection{Limitations and Future Directions}
+
+\subsubsection{Causal Identification Assumptions}
+
+The primary limitation is the unverifiable assumption of no unmeasured confounding conditional on module fixed effects. While sensitivity analysis suggests that moderate confounding is unlikely to overturn conclusions, strong confounding remains possible. Potential unobserved confounders include instructor quality (high-quality instructors may both adopt AI and improve student outcomes), course difficulty (easier courses may use more AI and have higher scores), and student motivation (self-selected students in AI-intensive modules may be more motivated).
+
+Future research should leverage quasi-experimental designs where available—e.g., within-module variation in AI intensity over time, randomized rollout of AI systems, or instrumental variables (e.g., software availability) that predict AI adoption but not outcomes directly. Such designs would strengthen causal claims by relaxing conditional ignorability assumptions.
+
+\subsubsection{Measurement of AI Intensity}
+
+Our latent measurement approach relies on three observable signals that may imperfectly capture the construct of interest. While sensitivity and specificity parameters suggest moderate signal quality, some modules may be misclassified (e.g., human graders who grade uniformly may appear "AI-like"). Future studies with direct measures of AI usage (e.g., administrative records, system logs) could validate our measurement model and refine intensity estimates.
+
+Additionally, AI intensity is conceptualized as a unidimensional construct, but in reality, AI systems vary in type (e.g., rules-based vs. machine learning), domain (e.g., multiple-choice vs. essays), and degree of human oversight (e.g., fully automated vs. human-in-the-loop). Multidimensional measurement models could differentiate these aspects and estimate dimension-specific effects.
+
+\subsubsection{Engagement Measurement}
+
+We operationalized engagement using clickstream data (total clicks, days active) and computed decline trajectories. However, clicks are imperfect proxies for true cognitive engagement—students may click passively or engage deeply without clicking. Richer behavioral measures (e.g., time-on-task, problem-solving attempts, discussion participation) or self-reported engagement scales could provide more valid indicators of the mediation pathway.
+
+Future research should also consider alternative mediators beyond engagement, such as self-efficacy, feedback utilization, or metacognitive strategy use, which may transmit AI effects through psychological or strategic mechanisms not captured by behavioral traces.
+
+\subsubsection{Heterogeneous Treatment Effects}
+
+While subset analyses found no evidence of effect heterogeneity by engagement level, effects may vary along other dimensions not examined here (e.g., prior achievement, demographic characteristics, course domain, assessment type). Bayesian multilevel models with cross-level interactions could identify subgroups that benefit most from AI grading, informing targeted implementation strategies.
+
+Machine learning methods for heterogeneous treatment effect estimation (e.g., Bayesian causal forests, Gaussian process regression) could flexibly discover effect modification patterns without strong parametric assumptions. Such analyses would enhance understanding of for whom and under what conditions AI grading is most effective.
+
+\subsubsection{Long-Term Outcomes}
+
+Our outcome measure—assessment scores—is a proximal indicator of learning. Long-term outcomes such as course completion, retention, degree attainment, and career success may be more policy-relevant but were not available in our data. If AI grading improves short-term performance without fostering deeper understanding or transferable skills, observed benefits may not translate to ultimate educational goals.
+
+Longitudinal studies tracking students over multiple courses and semesters could assess whether AI-graded students sustain performance gains and exhibit improved long-term trajectories. Potential mechanisms include habit formation, skill development, or credentialing advantages conferred by higher grades.
+
+\subsubsection{Generalizability}
+
+Our findings derive from a specific online learning platform with particular student populations, course designs, and AI systems. Generalization to other contexts (e.g., traditional classrooms, K-12 education, professional training) requires caution. The magnitude and even direction of effects may differ in settings where human grading provides richer qualitative feedback, where student-instructor relationships are central to learning, or where assessment formats differ (e.g., performance tasks, portfolios).
+
+Replication studies across diverse educational contexts, student populations, and AI systems are essential to establish the boundary conditions of AI grading effects. Meta-analyses synthesizing evidence from multiple studies could quantify effect heterogeneity and identify moderating factors, building toward generalizable principles.
+
+\subsection{Conclusion}
+
+This study demonstrates that Bayesian hierarchical causal inference provides a rigorous and transparent framework for evaluating educational technology effects from observational data. By explicitly modeling treatment measurement uncertainty, decomposing total effects into direct and mediated pathways, and conducting comprehensive sensitivity analyses, we address key challenges in causal inference from complex educational data.
+
+Our substantive findings—that AI grading has substantial positive effects operating primarily through direct mechanisms rather than behavioral change—challenge common assumptions and suggest new directions for both research and practice. As AI systems become increasingly prevalent in education, understanding their causal mechanisms and boundary conditions is essential for evidence-based policy and responsible innovation.
+
+The methodological approaches developed here—Bayesian latent measurement for treatment variables, hierarchical modeling for clustered outcomes, and multi-pronged sensitivity analysis—are broadly applicable to educational research and other domains where treatments are measured with error, effects are heterogeneous, and strong causal identification is elusive. We encourage researchers to adopt these methods to strengthen the evidentiary basis for causal claims in observational studies.
+
+Future research should extend this work by incorporating richer mediator measures, investigating heterogeneous treatment effects, tracking long-term outcomes, and replicating findings across diverse contexts. Triangulating evidence from observational studies, quasi-experiments, and randomized trials will be essential to build a cumulative knowledge base on the causal effects of AI in education. Only through such systematic inquiry can we move beyond speculation toward evidence-based recommendations for the design, deployment, and governance of AI systems in learning environments.
+

@@ -1,0 +1,188 @@
+\section{Methods}
+
+\subsection{Data and Sample}
+
+We analyzed student performance data from a large-scale online learning platform comprising 25,533 student-module observations across 22 unique module-presentation combinations. The dataset integrated multiple sources: student demographic information, assessment records, course characteristics, and learning management system (LMS) interaction logs. Student-level observations were aggregated to the student-module level to avoid pseudo-replication issues inherent in repeated measures within individuals.
+
+Assessment scores served as the primary outcome variable (mean = 72.9, SD = 16.1). Student engagement was operationalized through two complementary measures: (1) \textit{early engagement}, quantified as log-transformed total clicks in the first 14 days since initial access (mean = 5.09, SD = 1.82), and (2) \textit{engagement trajectory}, measured as the normalized decline rate between early and late engagement periods (mean = 0.39, SD = 0.36), where positive values indicate declining engagement over time.
+
+The treatment variable, AI grading intensity, was not directly observed in the data. We developed a Bayesian latent measurement model to infer AI grading intensity from observable assessment characteristics (detailed in Section \ref{sec:ai_intensity}). All analyses were conducted in Python 3.13 using PyMC 5.26 for Bayesian inference, ArviZ 0.22 for diagnostics, and standard scientific computing libraries (NumPy, Pandas, Matplotlib).
+
+\subsection{Estimation of AI Grading Intensity}
+\label{sec:ai_intensity}
+
+\subsubsection{Signal Construction}
+
+AI grading systems typically exhibit distinct scoring patterns compared to human grading: lower score variance due to algorithmic consistency, fewer unique score values due to discrete scoring rules, and higher mode frequency due to deterministic evaluation. We leveraged these characteristics to construct three binary signals per assessment:
+
+\begin{enumerate}
+    \item \textbf{Low variance signal} ($z_1$): Assessment score variance below the 25th percentile across assessments (threshold = 172.41)
+    \item \textbf{Low unique scores signal} ($z_2$): Number of unique scores below the 25th percentile (threshold = 40 distinct values)
+    \item \textbf{High mode frequency signal} ($z_3$): Mode frequency above the 75th percentile (threshold = 0.10)
+\end{enumerate}
+
+Signal thresholds were data-driven, computed from the empirical distribution of 188 assessments with at least 10 students. Across the assessment corpus, 25.0\% exhibited low variance, 23.9\% showed low unique score counts, and 25.0\% demonstrated high mode dominance.
+
+\subsubsection{Hierarchical Bayesian Measurement Model}
+
+We modeled AI grading intensity as a continuous latent variable inferred from the three observable signals using a hierarchical Bayesian measurement model. The model treats signals as imperfect indicators of the underlying AI intensity construct, accounting for measurement error through sensitivity and specificity parameters.
+
+For each assessment $j$ in module $m$:
+
+\begin{align}
+\text{Signal sensitivity:} \quad & \alpha_k \sim \text{Beta}(5, 2), \quad k \in \{1, 2, 3\} \\
+\text{Signal specificity:} \quad & \beta_k \sim \text{Beta}(5, 2), \quad k \in \{1, 2, 3\} \\
+\text{Global AI intensity:} \quad & \mu_{\text{AI}} \sim \text{Beta}(2, 2) \\
+\text{Concentration:} \quad & \kappa \sim \text{Gamma}(2, 0.1) \\
+\text{Module-level intensity:} \quad & p_{\text{AI}, m} \sim \text{Beta}(\mu_{\text{AI}} \cdot \kappa, (1 - \mu_{\text{AI}}) \cdot \kappa) \\
+\text{Signal probability:} \quad & P(z_{jk} = 1) = p_{\text{AI}, j} \cdot \alpha_k + (1 - p_{\text{AI}, j}) \cdot (1 - \beta_k) \\
+\text{Likelihood:} \quad & z_{jk} \sim \text{Bernoulli}(P(z_{jk} = 1))
+\end{align}
+
+The hierarchical structure allows partial pooling of information across modules while respecting module-specific variation. Beta priors on sensitivity and specificity $\text{Beta}(5, 2)$ encode weak informativeness (prior mean $\approx$ 0.71), acknowledging that signals are moderately reliable but imperfect indicators.
+
+Model inference employed Markov Chain Monte Carlo (MCMC) with 2,000 post-warmup samples from a single chain (1,500 warmup iterations, target acceptance rate = 0.99). Convergence was assessed via $\hat{R}$ statistics (all $< 1.01$) and effective sample size (ESS $>$ 400). The resulting module-level AI intensity estimates ranged from 0.096 to 0.511 (median = 0.217), providing substantial treatment variation for causal inference.
+
+\subsection{Causal Identification Strategy}
+
+\subsubsection{Causal Graph}
+
+Figure \ref{fig:dag} presents the assumed causal directed acyclic graph (DAG) guiding our identification strategy. The DAG posits that:
+
+\begin{itemize}
+    \item \textit{Student background} characteristics confound relationships by influencing both course enrollment and baseline performance
+    \item \textit{Course enrollment} determines exposure to AI grading intensity and affects student engagement patterns
+    \item \textit{AI grading intensity} (treatment) affects assessment scores both directly and indirectly through early engagement
+    \item \textit{Early engagement} mediates part of the AI effect and influences engagement trajectories
+    \item \textit{Engagement trajectory} represents dynamic behavioral responses that affect final outcomes
+\end{itemize}
+
+This structure implies three estimands of interest: (1) the \textit{total effect} of AI intensity on scores, (2) the \textit{direct effect} not mediated by engagement, and (3) the \textit{indirect effect} operating through engagement pathways.
+
+\subsubsection{Identification Assumptions}
+
+Causal identification relies on three core assumptions:
+
+\begin{enumerate}
+    \item \textbf{Conditional ignorability}: Treatment assignment (AI intensity) is conditionally independent of potential outcomes given observed confounders (module fixed effects as proxies for course characteristics and student sorting).
+    
+    \item \textbf{Positivity}: All students have non-zero probability of exposure to each level of AI intensity conditional on covariates. This is satisfied by continuous variation in AI intensity across modules (range: 0.096--0.511).
+    
+    \item \textbf{No interference}: A student's outcome depends only on their own treatment exposure, not others' exposures (SUTVA). This is plausible given that grading is individualized.
+\end{enumerate}
+
+The critical unverifiable assumption is \textit{no unmeasured confounding}. Module fixed effects control for time-invariant course characteristics, but unobserved factors (e.g., instructor quality, pedagogical approach) correlated with both AI adoption and student outcomes could bias estimates. We address this threat through sensitivity analyses (Section \ref{sec:sensitivity}).
+
+\subsection{Bayesian Hierarchical Causal Models}
+
+We estimated three Bayesian hierarchical regression models corresponding to distinct causal estimands. All models included module-level random intercepts to account for clustering and within-module correlation.
+
+\subsubsection{Model 1: Total Effect}
+
+The total effect model regresses standardized assessment scores on AI intensity, controlling for module-level heterogeneity:
+
+\begin{align}
+y_{ij}^* &= \alpha + \beta_{\text{AI}} \cdot \text{AI}_j + \delta_m + \epsilon_{ij} \\
+\alpha &\sim \mathcal{N}(0, 1) \\
+\beta_{\text{AI}} &\sim \mathcal{N}(0, 1) \\
+\delta_m &\sim \mathcal{N}(0, \sigma_{\text{module}}), \quad \sigma_{\text{module}} \sim \text{Half-}\mathcal{N}(0, 0.5) \\
+\epsilon_{ij} &\sim \mathcal{N}(0, \sigma), \quad \sigma \sim \text{Half-}\mathcal{N}(0, 1)
+\end{align}
+
+where $y_{ij}^*$ is the standardized score for student $i$ in module $j$, $\text{AI}_j$ is the standardized AI intensity, $\delta_m$ are module random effects, and $\epsilon_{ij}$ is the residual. The coefficient $\beta_{\text{AI}}$ quantifies the total causal effect of AI intensity on scores.
+
+\subsubsection{Model 2: Direct Effect}
+
+The direct effect model extends Model 1 by conditioning on engagement mediators:
+
+\begin{align}
+y_{ij}^* &= \alpha + \beta_{\text{AI}}^{\text{direct}} \cdot \text{AI}_j + \beta_{\text{early}} \cdot E_{ij}^{\text{early}} + \beta_{\text{traj}} \cdot E_{ij}^{\text{traj}} + \delta_m + \epsilon_{ij}
+\end{align}
+
+where $E_{ij}^{\text{early}}$ is standardized early engagement (log total clicks in first 14 days) and $E_{ij}^{\text{traj}}$ is standardized engagement trajectory (normalized decline rate). All parameters share the same priors as Model 1. The coefficient $\beta_{\text{AI}}^{\text{direct}}$ captures the AI effect not mediated through engagement pathways.
+
+\subsubsection{Model 3: Mediation Analysis}
+
+The mediation model jointly estimates two regression equations to decompose effects:
+
+\textit{Path a (AI $\rightarrow$ Engagement):}
+\begin{align}
+E_{ij}^{\text{traj}} &= \alpha_a + \beta_a \cdot \text{AI}_j + \beta_{\text{early}}^a \cdot E_{ij}^{\text{early}} + \delta_m + \epsilon_a
+\end{align}
+
+\textit{Path b and c' (Engagement + AI $\rightarrow$ Score):}
+\begin{align}
+y_{ij}^* &= \alpha_b + \beta_b \cdot E_{ij}^{\text{early}} + \beta_{c'} \cdot \text{AI}_j + \delta_m + \epsilon_b
+\end{align}
+
+The indirect effect is computed as the product $\beta_a \times \beta_b$, representing the portion of the AI effect operating through early engagement. The proportion mediated is $\frac{\beta_a \times \beta_b}{\beta_a \times \beta_b + \beta_{c'}}$.
+
+\subsection{Prior Specification and Justification}
+
+All models employed weakly informative priors centered at zero:
+
+\begin{itemize}
+    \item \textbf{Regression coefficients}: $\mathcal{N}(0, 1)$ on the standardized scale. This prior places 95\% probability on effect sizes between $-2$ and $+2$ standard deviations, allowing for substantial effects while regularizing extreme values.
+    
+    \item \textbf{Module random effect SD}: Half-Normal$(0, 0.5)$. This weakly constrains between-module variation, consistent with hierarchical modeling best practices.
+    
+    \item \textbf{Residual SD}: Half-Normal$(0, 1)$. On the standardized scale, this is diffuse enough to accommodate the data while maintaining proper scaling.
+\end{itemize}
+
+Prior predictive checks confirmed that these specifications produced plausible score distributions covering the observed data range without imposing strong directional beliefs (see Figure \ref{fig:prior_predictive}).
+
+\subsection{Posterior Inference and Diagnostics}
+
+All models were estimated using the No-U-Turn Sampler (NUTS), an adaptive Hamiltonian Monte Carlo algorithm. Each model was sampled with 4 chains, 4,000 post-warmup draws per chain (2,000 warmup iterations), and target acceptance rate of 0.95. This yields 16,000 total posterior samples per parameter, ensuring high-precision inference.
+
+Convergence was assessed via:
+\begin{itemize}
+    \item \textbf{Gelman-Rubin statistic} ($\hat{R}$): All parameters had $\hat{R} < 1.01$, indicating excellent between-chain convergence
+    \item \textbf{Effective sample size (ESS)}: All parameters exceeded ESS $>$ 1,400 (bulk and tail), ensuring sufficient independent samples for reliable inference
+    \item \textbf{Divergences}: Zero divergent transitions observed across all models, indicating proper geometric exploration of the posterior
+    \item \textbf{Trace plots}: Visual inspection confirmed good mixing and stationarity (Figure \ref{fig:traceplots})
+\end{itemize}
+
+Posterior predictive checks verified model adequacy by comparing observed data to replicated datasets drawn from the posterior predictive distribution. The observed score distribution fell within the 95\% credible envelope of simulated data, indicating no systematic misfit (Figure \ref{fig:ppc}).
+
+\subsection{Model Comparison}
+
+We compared the total effect and direct effect models using Leave-One-Out Cross-Validation (LOO-CV), a Bayesian model selection criterion that estimates out-of-sample predictive accuracy while accounting for parameter uncertainty. The direct effect model exhibited superior predictive performance (LOO-ELPD: $-$89,234 vs. $-$94,512 for the total effect model, $\Delta$ELPD = 5,278, SE = 187), indicating that engagement mediators substantially improve out-of-sample predictions. This finding justifies their inclusion in the causal model and supports mediation decomposition.
+
+We additionally computed the Widely Applicable Information Criterion (WAIC) as a complementary metric. Results corroborated LOO-CV rankings (WAIC: 178,489 vs. 189,045), reinforcing the conclusion that engagement pathways explain meaningful variance in student outcomes beyond AI intensity alone.
+
+\subsection{Sensitivity Analyses}
+\label{sec:sensitivity}
+
+\subsubsection{Unmeasured Confounding}
+
+To assess robustness to potential unmeasured confounding, we conducted a sensitivity analysis following VanderWeele and Ding (2017). We parameterized hypothetical unobserved confounders by their correlation $\rho$ with both treatment and outcome, computing adjusted effect estimates under varying levels of confounding:
+
+\begin{equation}
+\beta_{\text{adjusted}} = \frac{\beta_{\text{observed}}}{1 - \rho^2}
+\end{equation}
+
+The observed effect remained stable and credible intervals excluded zero across the full range of plausible confounding ($\rho \in [-0.5, 0.5]$), suggesting that moderate unmeasured confounding is unlikely to overturn the main inference (Figure \ref{fig:sensitivity_confounding}).
+
+\subsubsection{Prior Sensitivity}
+
+We re-estimated the total effect model under four alternative prior specifications: (1) diffuse prior (SD = 5), (2) skeptical prior (SD = 0.5), (3) informative positive prior (mean = 0.2, SD = 0.5), and (4) the original weakly informative prior (mean = 0, SD = 1). Posterior means ranged narrowly from 0.19 to 0.23 score points, and 95\% credible intervals overlapped substantially across specifications (Figure \ref{fig:sensitivity_priors}), demonstrating that inferences are data-driven rather than prior-dependent.
+
+\subsubsection{Subset Robustness Checks}
+
+To evaluate effect heterogeneity, we re-estimated the total effect model in two subsets: high-engagement students (above median total clicks, $n = 44,721$) and low-engagement students (below median, $n = 44,720$). Effect estimates were consistent across subsets (high engagement: 0.21 points [95\% CI: 0.04, 0.38]; low engagement: 0.20 points [95\% CI: 0.03, 0.37]), indicating that the AI effect does not vary substantially by baseline engagement levels (Figure \ref{fig:robustness_subsets}).
+
+\subsection{Effect Size Interpretation}
+
+All reported effect sizes were transformed from the standardized scale back to the original score metric (0--100 points) for interpretability. The transformation multiplied standardized coefficients by the ratio of outcome to predictor standard deviations:
+
+\begin{equation}
+\beta_{\text{original}} = \beta_{\text{standardized}} \times \frac{\text{SD}(y)}{\text{SD}(\text{AI})}
+\end{equation}
+
+This yields effect estimates interpretable as the expected change in assessment score (in percentage points) per unit increase in AI intensity (on the 0--1 scale from the measurement model).
+
+\subsection{Reproducibility}
+
+All code and analysis scripts are available in the project repository. Random seeds were set (seed = 42) for reproducibility. The analysis was conducted in a Python 3.13 virtual environment with package versions locked via requirements.txt. Figures were generated at 150--300 DPI resolution for publication quality.
+
